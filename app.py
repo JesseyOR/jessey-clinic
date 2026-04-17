@@ -1,9 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
-from flask_login import LoginManager, login_required, current_user
+from flask import Flask, render_template, redirect
 from flask_migrate import Migrate 
 from config import ActiveConfig
 from database.db import init_db, db
-from database.models import User, AuditLog
 import logging
 import sys
 
@@ -16,23 +14,13 @@ def create_app():
     init_db(app)
     Migrate(app, db)
 
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
-    login_manager.login_message = "Please log in to access this page."
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
-
     # Logging for production
     if not app.debug:
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.INFO)
         app.logger.addHandler(handler)
 
-    # Register blueprints
-    from routes.auth_routes import auth_bp
+    # ✅ Register only the necessary blueprints (NO auth_bp)
     from routes.dashboard_routes import dashboard_bp
     from routes.stock_routes import stock_bp
     from routes.sales_routes import sales_bp
@@ -43,7 +31,6 @@ def create_app():
     from routes.audit_routes import audit_bp
     from routes.api.mobile_api import mobile_api_bp
 
-    app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
     app.register_blueprint(stock_bp, url_prefix='/stock')
     app.register_blueprint(sales_bp, url_prefix='/sales')
@@ -68,15 +55,12 @@ def create_app():
         db.session.rollback()
         return render_template('errors/500.html'), 500
 
+    # ✅ Direct open access – no login, no user checks
     @app.route('/')
-    @login_required
     def index():
-        if current_user.role == 'admin':
-            return redirect(url_for('dashboard.admin_dashboard'))
-        elif current_user.role == 'pharmacist':
-            return redirect(url_for('dashboard.pharmacist_dashboard'))
-        else:
-            return redirect(url_for('dashboard.cashier_dashboard'))
+        # Make sure 'dashboard.admin_dashboard' exists.
+        # If not, change to a known good route, e.g. 'dashboard.index'
+        return redirect('/dashboard')
 
     @app.context_processor
     def inject_now():
