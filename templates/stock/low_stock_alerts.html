@@ -1,0 +1,111 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Low Stock Alerts{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-exclamation-triangle text-warning"></i> Low Stock Alerts</h2>
+    <p class="text-muted">Drugs with stock at or below reorder level</p>
+
+    <div class="card shadow">
+        <div class="card-body">
+            {% if drugs %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>Name</th>
+                                <th>Current Stock</th>
+                                <th>Reorder Level</th>
+                                <th>Expiry Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for drug in drugs %}
+                            <tr>
+                                <td>
+                                    {{ drug.name }}<br>
+                                    <small class="text-muted">{{ drug.generic_name or '' }}</small>
+                                </td>
+                                <td class="text-danger fw-bold">{{ drug.quantity }}</td>
+                                <td>{{ drug.reorder_level }}</td>
+                                <td>{{ drug.expiry_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary order-stock" data-id="{{ drug.id }}" data-name="{{ drug.name }}">
+                                        <i class="fas fa-truck"></i> Order
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> No low stock items. Good inventory!
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Order for: <strong id="orderDrugName"></strong></p>
+                <label>Quantity to order:</label>
+                <input type="number" id="orderQty" class="form-control" min="1">
+                <label class="mt-2">Supplier:</label>
+                <select id="orderSupplier" class="form-select">
+                    <option value="">Select supplier</option>
+                    {% for supplier in suppliers|default([]) %}
+                        <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmOrder">Place Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentDrugId = null;
+    $('.order-stock').click(function() {
+        currentDrugId = $(this).data('id');
+        $('#orderDrugName').text($(this).data('name'));
+        $('#orderModal').modal('show');
+    });
+    $('#confirmOrder').click(function() {
+        let qty = parseInt($('#orderQty').val());
+        let supplierId = $('#orderSupplier').val();
+        if (isNaN(qty) || qty <= 0) {
+            alert('Enter valid quantity');
+            return;
+        }
+        $.ajax({
+            url: '/stock/adjust/' + currentDrugId,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({adjustment: qty, supplier_id: supplierId}),
+            success: function(res) {
+                if (res.success) {
+                    alert('Stock added successfully');
+                    location.reload();
+                } else {
+                    alert('Error: ' + res.error);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

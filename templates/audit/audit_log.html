@@ -1,0 +1,94 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Audit Log{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2><i class="fas fa-history"></i> System Audit Log</h2>
+    <p class="text-muted">Track all user actions for security and compliance</p>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label>User</label>
+                    <select name="user_id" class="form-select">
+                        <option value="">All Users</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}" {% if selected_user == user.id %}selected{% endif %}>{{ user.username }} ({{ user.role }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Days</label>
+                    <select name="days" class="form-select">
+                        <option value="1" {% if days == 1 %}selected{% endif %}>Last 24h</option>
+                        <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 days</option>
+                        <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 days</option>
+                        <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 days</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-primary d-block w-100">Filter</button>
+                </div>
+                <div class="col-md-2">
+                    <label>&nbsp;</label>
+                    <a href="{{ url_for('audit.audit_log') }}" class="btn btn-secondary d-block w-100">Reset</a>
+                </div>
+                <div class="col-md-3">
+                    <label>&nbsp;</label>
+                    <form method="POST" action="{{ url_for('audit.clear_old_logs') }}" onsubmit="return confirm('Delete old logs? This cannot be undone.')">
+                        <input type="hidden" name="days_to_keep" value="90">
+                        <button type="submit" class="btn btn-danger d-block w-100">Clear Logs (>90 days)</button>
+                    </form>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Details</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs.items %}
+                        <tr>
+                            <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ log.user.username if log.user else 'SYSTEM' }}</td>
+                            <td><span class="badge bg-secondary">{{ log.action }}</span></td>
+                            <td>{{ log.details or '-' }}</td>
+                            <td>{{ log.ip_address or '-' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center">No audit logs found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if logs.has_prev %}
+                    <li class="page-item"><a class="page-link" href="?page={{ logs.prev_num }}&user_id={{ selected_user }}&days={{ days }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">Page {{ logs.page }} of {{ logs.pages }}</span></li>
+                    {% if logs.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ logs.next_num }}&user_id={{ selected_user }}&days={{ days }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

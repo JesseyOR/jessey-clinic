@@ -1,0 +1,66 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Daily Sales Report{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-calendar-day"></i> Daily Sales Report</h2>
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="GET" class="row g-2">
+                <div class="col-auto">
+                    <input type="date" name="date" value="{{ date.strftime('%Y-%m-%d') }}" class="form-control">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">View</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h5>Report for {{ date.strftime('%B %d, %Y') }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="alert alert-success">
+                        <strong>Total Sales:</strong> ${{ "%.2f"|format(total) }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="alert alert-info">
+                        <strong>Transactions:</strong> {{ count }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="alert alert-secondary">
+                        <strong>Average Ticket:</strong> ${{ "%.2f"|format(total/count if count else 0) }}
+                    </div>
+                </div>
+            </div>
+
+            <h6>Transaction Details</h6>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr><th>Time</th><th>Invoice</th><th>Cashier</th><th>Total</th><th>Items</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td>{{ sale.created_at.strftime('%H:%M') }}</td>
+                            <td>{{ sale.invoice_number }}</td>
+                            <td>{{ sale.cashier.username }}</td>
+                            <td>${{ "%.2f"|format(sale.total) }}</td>
+                            <td>{{ sale.items|length }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

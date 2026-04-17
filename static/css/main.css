@@ -1,0 +1,206 @@
+/* Jessey Clinic Pharmacy - Main Stylesheet */
+:root {
+    --jessey-primary: #1abc9c;
+    --jessey-dark: #1e2a3a;
+    --jessey-danger: #e74c3c;
+    --jessey-warning: #f39c12;
+    --jessey-info: #3498db;
+    --jessey-success: #27ae60;
+    --jessey-light: #ecf0f1;
+    --jessey-gray: #95a5a6;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background-color: #f4f6f9;
+    color: #2c3e50;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.text-jessey {
+    color: var(--jessey-primary);
+}
+
+.bg-jessey {
+    background-color: var(--jessey-primary);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--jessey-primary);
+    border-color: var(--jessey-primary);
+}
+.btn-primary:hover {
+    background-color: #16a085;
+    border-color: #16a085;
+}
+.btn-outline-primary {
+    color: var(--jessey-primary);
+    border-color: var(--jessey-primary);
+}
+.btn-outline-primary:hover {
+    background-color: var(--jessey-primary);
+    border-color: var(--jessey-primary);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+.card-stats {
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+}
+.card-stats .card-body {
+    padding: 1.25rem;
+}
+
+/* Tables */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+.table thead th {
+    background-color: var(--jessey-dark);
+    color: white;
+    font-weight: 500;
+    border: none;
+    padding: 12px 15px;
+}
+.table tbody tr:hover {
+    background-color: rgba(26, 188, 156, 0.05);
+}
+
+/* Alerts */
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Forms */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 0.75rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--jessey-primary);
+    box-shadow: 0 0 0 0.2rem rgba(26, 188, 156, 0.25);
+}
+
+/* Badges */
+.badge {
+    padding: 0.35em 0.65em;
+    border-radius: 6px;
+    font-weight: 500;
+}
+.badge-success {
+    background-color: var(--jessey-success);
+}
+.badge-danger {
+    background-color: var(--jessey-danger);
+}
+.badge-warning {
+    background-color: var(--jessey-warning);
+    color: #000;
+}
+.badge-info {
+    background-color: var(--jessey-info);
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--jessey-primary);
+    border-radius: 8px;
+    margin: 0 2px;
+}
+.pagination .page-item.active .page-link {
+    background-color: var(--jessey-primary);
+    border-color: var(--jessey-primary);
+    color: white;
+}
+
+/* Sidebar custom */
+#sidebar {
+    transition: all 0.3s;
+}
+#sidebar ul li a {
+    transition: all 0.2s;
+}
+#sidebar ul li a i {
+    width: 28px;
+}
+
+/* Print styles (overridden by print.css) */
+@media print {
+    .no-print, #sidebar, .navbar-custom, footer, .btn, .alert, form {
+        display: none !important;
+    }
+    #content {
+        margin: 0;
+        padding: 0;
+    }
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.5rem; }
+    .card-stats .card-body { padding: 0.8rem; }
+    .table-responsive { font-size: 0.85rem; }
+}
+
+/* Utility */
+.cursor-pointer {
+    cursor: pointer;
+}
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

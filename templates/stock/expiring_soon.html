@@ -1,0 +1,97 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Expiry Tracking{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-hourglass-half text-warning"></i> Expiry Management</h2>
+    <p class="text-muted">Track drugs nearing expiry or already expired</p>
+
+    <!-- Expiring Soon -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0"><i class="fas fa-clock"></i> Expiring Soon (within {{ config.EXPIRY_WARNING_DAYS }} days)</h5>
+        </div>
+        <div class="card-body">
+            {% if drugs %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Drug</th><th>Batch</th><th>Expiry Date</th><th>Days Left</th><th>Stock</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for drug in drugs %}
+                            <tr>
+                                <td>{{ drug.name }}</td>
+                                <td>{{ drug.batch_number or '-' }}</td>
+                                <td class="text-warning fw-bold">{{ drug.expiry_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ drug.days_until_expiry }} days</td>
+                                <td>{{ drug.quantity }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger mark-expired" data-id="{{ drug.id }}" data-name="{{ drug.name }}">
+                                        <i class="fas fa-trash"></i> Mark Expired
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-success">No drugs expiring soon.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Expired -->
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="fas fa-skull-crossbones"></i> Expired Drugs</h5>
+        </div>
+        <div class="card-body">
+            {% if expired %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr><th>Drug</th><th>Expiry Date</th><th>Stock</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for drug in expired %}
+                            <tr>
+                                <td>{{ drug.name }}</td>
+                                <td class="text-danger">{{ drug.expiry_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ drug.quantity }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-secondary remove-expired" data-id="{{ drug.id }}">
+                                        <i class="fas fa-dumpster"></i> Dispose
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-success">No expired drugs.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    $('.mark-expired').click(function() {
+        if (confirm('Mark this drug as expired? Stock will be set to zero.')) {
+            let id = $(this).data('id');
+            $.ajax({
+                url: '/stock/adjust/' + id,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({adjustment: -999999}), // will deduct all stock
+                success: function(res) {
+                    location.reload();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4"><i class="fas fa-chart-line"></i> Executive Dashboard</h2>
+    
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card card-stats bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-white-50">Today's Sales</h6>
+                            <h2 class="mb-0">${{ "%.2f"|format(today_total) }}</h2>
+                        </div>
+                        <i class="fas fa-money-bill-wave fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-stats bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-white-50">Month Revenue</h6>
+                            <h2 class="mb-0">${{ "%.2f"|format(month_total) }}</h2>
+                        </div>
+                        <i class="fas fa-calendar-alt fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-stats bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-dark-50">Stock Value</h6>
+                            <h2 class="mb-0">${{ "%.2f"|format(stock_value) }}</h2>
+                        </div>
+                        <i class="fas fa-boxes fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-stats bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-white-50">Low Stock Alerts</h6>
+                            <h2 class="mb-0">{{ low_stock|length }}</h2>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-hourglass-end"></i> Expired Drugs
+                </div>
+                <div class="card-body">
+                    {% if expired %}
+                        <ul class="list-group">
+                            {% for d in expired %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                {{ d.name }}
+                                <span class="badge bg-danger">Expired {{ d.expiry_date.strftime('%Y-%m-%d') }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-success"><i class="fas fa-check-circle"></i> No expired drugs</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-clock"></i> Expiring Soon
+                </div>
+                <div class="card-body">
+                    {% if expiring_soon %}
+                        <ul class="list-group">
+                            {% for d in expiring_soon %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                {{ d.name }}
+                                <span class="badge bg-warning">{{ d.days_until_expiry }} days left</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-success">No expiring soon</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-trophy"></i> Top 5 Selling Products (30 days)
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr><th>Product</th><th>Units Sold</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for drug in top_drugs %}
+                        <tr>
+                            <td>{{ drug.name }}</td>
+                            <td>{{ drug.total_sold }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="2">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

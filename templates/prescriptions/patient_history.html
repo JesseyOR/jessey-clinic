@@ -1,0 +1,94 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Patient History - {{ patient.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-user-md"></i> Patient: {{ patient.full_name }}</h2>
+        <a href="{{ url_for('prescriptions.attach') }}" class="btn btn-primary">New Prescription</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6>Patient Details</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Phone:</strong> {{ patient.phone or 'N/A' }}</p>
+                    <p><strong>Email:</strong> {{ patient.email or 'N/A' }}</p>
+                    <p><strong>Date of Birth:</strong> {{ patient.date_of_birth.strftime('%Y-%m-%d') if patient.date_of_birth else 'N/A' }}</p>
+                    <p><strong>Allergies:</strong> {{ patient.allergies or 'None' }}</p>
+                    <p><strong>Blood Type:</strong> {{ patient.blood_type or 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h6>Prescription History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr><th>Drug</th><th>Doctor</th><th>Date</th><th>Expiry</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for rx in prescriptions %}
+                                <tr>
+                                    <td>{{ rx.drug.name }}</td>
+                                    <td>{{ rx.doctor_name or '-' }}</td>
+                                    <td>{{ rx.prescription_date.strftime('%Y-%m-%d') }}</td>
+                                    <td class="{% if rx.expiry_date and rx.expiry_date < now.date() %}text-danger{% endif %}">
+                                        {{ rx.expiry_date.strftime('%Y-%m-%d') if rx.expiry_date else 'N/A' }}
+                                    </td>
+                                    <td>
+                                        {% if not rx.expiry_date or rx.expiry_date >= now.date() %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Expired</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5">No prescriptions</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h6>Purchase History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr><th>Date</th><th>Invoice</th><th>Items</th><th>Total</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for sale in sales %}
+                                <tr>
+                                    <td>{{ sale.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ sale.invoice_number }}</td>
+                                    <td>{{ sale.items|length }}</td>
+                                    <td>${{ "%.2f"|format(sale.total) }}</td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4">No purchases</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

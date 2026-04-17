@@ -1,0 +1,49 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Supplier Balances{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-coins"></i> Supplier Outstanding Balances</h2>
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Supplier</th>
+                            <th>Total Purchases</th>
+                            <th>Total Payments</th>
+                            <th>Outstanding Balance</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for supplier in suppliers %}
+                        <tr>
+                            <td>{{ supplier.name }}</td>
+                            <td>${{ "%.2f"|format(supplier.total_purchases|default(0)) }}</td>
+                            <td>${{ "%.2f"|format(supplier.total_payments|default(0)) }}</td>
+                            <td class="{% if supplier.outstanding_balance > 0 %}text-danger{% elif supplier.outstanding_balance < 0 %}text-success{% endif %}">
+                                ${{ "%.2f"|format(supplier.outstanding_balance) }}
+                            </td>
+                            <td>
+                                {% if supplier.outstanding_balance > 0 %}
+                                    <span class="badge bg-warning text-dark">Owes Us</span>
+                                {% elif supplier.outstanding_balance < 0 %}
+                                    <span class="badge bg-info">We Owe</span>
+                                {% else %}
+                                    <span class="badge bg-success">Settled</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="text-center">No supplier data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

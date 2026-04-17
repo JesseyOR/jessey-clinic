@@ -1,0 +1,56 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Receipt - {{ sale.invoice_number }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container" id="receiptContent">
+    <div class="card shadow">
+        <div class="card-body text-center">
+            <h3>JESSEY CLINIC PHARMACY</h3>
+            <p>123 Health Street, Medical District<br>Tel: +123 456 7890</p>
+            <hr>
+            <h5>TAX INVOICE</h5>
+            <p><strong>Invoice No:</strong> {{ sale.invoice_number }}<br>
+            <strong>Date:</strong> {{ sale.created_at.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+            <strong>Cashier:</strong> {{ sale.cashier.username }}<br>
+            <strong>Patient:</strong> {{ sale.patient.full_name if sale.patient else 'Walk-in Customer' }}</p>
+            <hr>
+            <table class="table table-sm">
+                <thead>
+                    <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in sale.items %}
+                    <tr>
+                        <td>{{ item.drug.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                        <td>${{ "%.2f"|format(item.total_price) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <hr>
+            <div class="row">
+                <div class="col-6 text-start">Subtotal:</div>
+                <div class="col-6 text-end">${{ "%.2f"|format(sale.subtotal) }}</div>
+                <div class="col-6 text-start">Tax (10%):</div>
+                <div class="col-6 text-end">${{ "%.2f"|format(sale.tax) }}</div>
+                <div class="col-6 text-start">Discount:</div>
+                <div class="col-6 text-end">${{ "%.2f"|format(sale.discount) }}</div>
+                <div class="col-6 text-start fw-bold">TOTAL:</div>
+                <div class="col-6 text-end fw-bold">${{ "%.2f"|format(sale.total) }}</div>
+            </div>
+            <hr>
+            <p><strong>Payment Method:</strong> {{ sale.payment_method|upper }}</p>
+            <p>Thank you for choosing Jessey Clinic!<br>Stay healthy.</p>
+            <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Print Receipt</button>
+            <a href="{{ url_for('sales.checkout') }}" class="btn btn-secondary">New Sale</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Mobile Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="mobile-container">
+    <div class="mobile-header">
+        <h4>Jessey Clinic Mobile</h4>
+        <p>{{ now.strftime('%d %b %Y, %I:%M %p') }}</p>
+    </div>
+
+    <div class="mobile-stats">
+        <div class="stat-card">
+            <span class="stat-value">${{ today_total|default(0)|round(2) }}</span>
+            <span class="stat-label">Today's Sales</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ low_stock_count|default(0) }}</span>
+            <span class="stat-label">Low Stock</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ expiring_count|default(0) }}</span>
+            <span class="stat-label">Expiring Soon</span>
+        </div>
+    </div>
+
+    <div class="mobile-actions">
+        <a href="{{ url_for('sales.checkout') }}" class="mobile-btn primary">
+            <i class="fas fa-cart-shopping"></i> New Sale
+        </a>
+        <a href="{{ url_for('stock.low_stock') }}" class="mobile-btn warning">
+            <i class="fas fa-exclamation-triangle"></i> Alerts
+        </a>
+        <a href="{{ url_for('reports.daily_report') }}" class="mobile-btn info">
+            <i class="fas fa-chart-simple"></i> Reports
+        </a>
+    </div>
+
+    <div class="mobile-recent">
+        <h5>Recent Sales</h5>
+        <ul class="recent-list">
+            {% for sale in recent_sales|default([]) %}
+            <li>
+                <span>{{ sale.invoice_number }}</span>
+                <span>${{ sale.total }}</span>
+                <small>{{ sale.created_at.strftime('%H:%M') }}</small>
+            </li>
+            {% else %}
+            <li>No recent sales</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/mobile_dashboard.js') }}"></script>
+<script>
+    // Auto-refresh every 30 seconds
+    setTimeout(() => location.reload(), 30000);
+</script>
+{% endblock %}

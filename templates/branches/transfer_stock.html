@@ -1,0 +1,87 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Transfer Stock{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-exchange-alt"></i> Transfer Stock Between Branches</h5>
+                </div>
+                <div class="card-body">
+                    <form id="transferForm" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">From Branch *</label>
+                            <select name="from_branch_id" class="form-select" required>
+                                <option value="">Select source branch</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}">{{ branch.name }} ({{ branch.location }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">To Branch *</label>
+                            <select name="to_branch_id" class="form-select" required>
+                                <option value="">Select destination branch</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}">{{ branch.name }} ({{ branch.location }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Drug *</label>
+                            <select name="drug_id" class="form-select" required>
+                                <option value="">Select drug</option>
+                                {% for drug in drugs %}
+                                <option value="{{ drug.id }}">{{ drug.name }} (Stock: {{ drug.quantity }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" name="quantity" class="form-control" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Transfer Reason</label>
+                            <textarea name="reason" class="form-control" rows="2" placeholder="e.g., Restock, Expiry rotation, etc."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Execute Transfer</button>
+                        <a href="{{ url_for('branches.central_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header bg-warning">
+                    <h6>Recent Transfers</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr><th>Date</th><th>From</th><th>To</th><th>Drug</th><th>Qty</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for transfer in recent_transfers %}
+                                <tr>
+                                    <td>{{ transfer.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ transfer.from_branch.name }}</td>
+                                    <td>{{ transfer.to_branch.name }}</td>
+                                    <td>{{ transfer.drug.name }}</td>
+                                    <td>{{ transfer.quantity }}</td>
+                                    <td><span class="badge bg-success">Completed</span></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="6" class="text-center">No transfers yet</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

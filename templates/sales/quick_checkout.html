@@ -1,0 +1,179 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Point of Sale{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pos-container {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .pos-products {
+        flex: 2;
+        min-width: 300px;
+    }
+    .pos-cart {
+        flex: 1;
+        min-width: 280px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 15px;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+    .product-card {
+        cursor: pointer;
+        transition: all 0.1s;
+    }
+    .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .cart-item-qty {
+        width: 60px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pos-container">
+    <!-- Product Search & List -->
+    <div class="pos-products">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by name, generic, or barcode...">
+                    <button class="btn btn-primary" id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+        <div id="productList" class="row g-3">
+            <!-- Products will load here -->
+            <div class="text-center p-5">Type to search products</div>
+        </div>
+    </div>
+
+    <!-- Cart -->
+    <div class="pos-cart">
+        <h5><i class="fas fa-shopping-cart"></i> Current Sale</h5>
+        <div id="cartItems">
+            {% if items %}
+                {% for item in items %}
+                <div class="cart-item" data-drug-id="{{ item.drug.id }}">
+                    <div>
+                        <strong>{{ item.drug.name }}</strong><br>
+                        <small>${{ "%.2f"|format(item.drug.selling_price) }} x {{ item.quantity }}</small>
+                    </div>
+                    <div>
+                        ${{ "%.2f"|format(item.subtotal) }}
+                        <button class="btn btn-sm btn-danger ms-2 remove-item" data-id="{{ item.drug.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Cart is empty</p>
+            {% endif %}
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+            <strong>Total:</strong>
+            <strong id="cartTotal">${{ "%.2f"|format(total) }}</strong>
+        </div>
+        <div class="mt-3">
+            <label>Payment Method</label>
+            <select id="paymentMethod" class="form-select mb-2">
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="insurance">Insurance</option>
+            </select>
+            <label>Patient (optional)</label>
+            <select id="patientId" class="form-select mb-3">
+                <option value="">Walk-in Customer</option>
+                {% for patient in patients|default([]) %}
+                <option value="{{ patient.id }}">{{ patient.full_name }}</option>
+                {% endfor %}
+            </select>
+            <button id="completeSaleBtn" class="btn btn-success w-100" {% if not items %}disabled{% endif %}>
+                <i class="fas fa-check-circle"></i> Complete Sale
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let searchTimeout;
+    $('#searchInput').on('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadProducts, 300);
+    });
+    $('#searchBtn').click(loadProducts);
+
+    function loadProducts() {
+        let query = $('#searchInput').val();
+        if (query.length < 2) return;
+        $.get('/api/mobile/search/drugs?q=' + encodeURIComponent(query), function(data) {
+            let html = '';
+            data.results.forEach(drug => {
+                html += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card product-card" data-id="${drug.id}" data-name="${drug.name}" data-price="${drug.selling_price}">
+                            <div class="card-body">
+                                <h6>${drug.name}</h6>
+                                <p class="text-primary">$${drug.price}</p>
+                                <small>Stock: ${drug.stock}</small>
+                                <button class="btn btn-sm btn-primary add-to-cart mt-2" data-id="${drug.id}">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            $('#productList').html(html || '<p class="text-muted">No products found</p>');
+        });
+    }
+
+    $(document).on('click', '.add-to-cart', function(e) {
+        e.stopPropagation();
+        let drugId = $(this).data('id');
+        $.ajax({
+            url: '/sales/add-to-cart',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({drug_id: drugId, quantity: 1}),
+            success: function() { location.reload(); }
+        });
+    });
+
+    $('.remove-item').click(function() {
+        let drugId = $(this).data('id');
+        $.ajax({
+            url: '/sales/remove-from-cart',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({drug_id: drugId}),
+            success: function() { location.reload(); }
+        });
+    });
+
+    $('#completeSaleBtn').click(function() {
+        let paymentMethod = $('#paymentMethod').val();
+        let patientId = $('#patientId').val();
+        $.post('/sales/complete-sale', {payment_method: paymentMethod, patient_id: patientId}, function() {
+            window.location.href = '/sales/history';
+        }).fail(function(xhr) {
+            alert('Sale failed: ' + xhr.responseText);
+        });
+    });
+</script>
+{% endblock %}

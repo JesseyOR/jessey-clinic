@@ -1,0 +1,49 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Product Performance{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-trophy"></i> Product Performance</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h5>Top Selling Products (Last {{ days }} days)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead><tr><th>Product</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+                            <tbody>
+                                {% for p in top %}
+                                <tr><td>{{ p.name }}</td><td>{{ p.qty }}</td><td>${{ "%.2f"|format(p.revenue) }}</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5>Slow Moving / Dead Stock</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead><tr><th>Product</th><th>Current Stock</th></tr></thead>
+                            <tbody>
+                                {% for d in slow %}
+                                <tr><td>{{ d.name }}</td><td>{{ d.quantity }}</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

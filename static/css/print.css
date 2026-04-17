@@ -1,0 +1,93 @@
+/* Jessey Clinic - Receipt & Report Print Styles */
+
+@media print {
+    /* Hide non-printable elements */
+    .no-print,
+    #sidebar,
+    .navbar-custom,
+    footer,
+    .btn,
+    .alert,
+    form,
+    .modal,
+    .dropdown-menu,
+    .pagination,
+    button,
+    .card-header .btn,
+    .sidebarCollapse,
+    .action-buttons {
+        display: none !important;
+    }
+
+    /* Main content takes full width */
+    #content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Card styling for print */
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 10px !important;
+    }
+
+    .card-header {
+        background: #f8f9fa !important;
+        border-bottom: 1px solid #ddd !important;
+    }
+
+    /* Table styling */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    .table thead th {
+        background: #f2f2f2 !important;
+        color: black !important;
+    }
+
+    /* Receipt specific */
+    .receipt {
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .receipt-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 10pt;
+    }
+
+    /* Page breaks */
+    .page-break {
+        page-break-before: always;
+    }
+
+    /* Ensure black text for printing */
+    body, .card, .text-muted {
+        color: black !important;
+    }
+
+    /* Remove background colors */
+    .bg-primary, .bg-success, .bg-danger, .bg-warning, .bg-info {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid #ccc !important;
+    }
+
+    /* Links */
+    a {
+        text-decoration: none;
+        color: black;
+    }
+}

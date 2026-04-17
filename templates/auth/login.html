@@ -1,0 +1,50 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Login - Jessey Clinic{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-white text-center pt-4 pb-2 border-0">
+                <i class="fas fa-clinic-medical fa-3x text-jessey"></i>
+                <h3 class="mt-2">Jessey Clinic</h3>
+                <p class="text-muted">Pharmacy Management System</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   required autofocus placeholder="Enter username">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   required placeholder="••••••">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer bg-white text-center border-0 pb-4">
+                <small class="text-muted">Authorized access only</small>
+                {% if config.DEBUG %}
+                <div class="alert alert-info mt-3 small">
+                    <strong>Demo Credentials:</strong><br>
+                    Admin: admin / admin123<br>
+                    Cashier: cashier / cash123
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

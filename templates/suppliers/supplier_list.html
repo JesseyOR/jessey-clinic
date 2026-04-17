@@ -1,0 +1,114 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-truck"></i> Supplier Management</h2>
+        {% if current_user.role in ['admin', 'pharmacist'] %}
+        <a href="{{ url_for('suppliers.add_supplier') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Supplier
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact Person</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Outstanding Balance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for supplier in suppliers %}
+                        <tr>
+                            <td>{{ supplier.name }}</td>
+                            <td>{{ supplier.contact_person or '-' }}</td>
+                            <td>{{ supplier.phone or '-' }}</td>
+                            <td>{{ supplier.email or '-' }}</td>
+                            <td class="{% if supplier.outstanding_balance > 0 %}text-danger{% elif supplier.outstanding_balance < 0 %}text-success{% endif %}">
+                                ${{ "%.2f"|format(supplier.outstanding_balance) }}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info view-purchases" data-id="{{ supplier.id }}">
+                                    <i class="fas fa-history"></i> Purchases
+                                </button>
+                                <button class="btn btn-sm btn-warning record-payment" data-id="{{ supplier.id }}" data-name="{{ supplier.name }}">
+                                    <i class="fas fa-money-bill"></i> Pay
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6" class="text-center">No suppliers registered</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Record Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Supplier: <strong id="supplierName"></strong></p>
+                <label>Amount to pay:</label>
+                <input type="number" id="paymentAmount" class="form-control" step="0.01" min="0">
+                <label class="mt-2">Payment Method:</label>
+                <select id="paymentMethod" class="form-select">
+                    <option value="cash">Cash</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="check">Check</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmPayment">Record Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSupplierId = null;
+    $('.record-payment').click(function() {
+        currentSupplierId = $(this).data('id');
+        $('#supplierName').text($(this).data('name'));
+        $('#paymentModal').modal('show');
+    });
+    $('#confirmPayment').click(function() {
+        let amount = parseFloat($('#paymentAmount').val());
+        let method = $('#paymentMethod').val();
+        if (isNaN(amount) || amount <= 0) {
+            alert('Enter valid amount');
+            return;
+        }
+        $.ajax({
+            url: '/suppliers/payment',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({supplier_id: currentSupplierId, amount: amount, method: method}),
+            success: function() {
+                location.reload();
+            },
+            error: function(xhr) {
+                alert('Error: ' + xhr.responseJSON?.error);
+            }
+        });
+    });
+</script>
+{% endblock %}

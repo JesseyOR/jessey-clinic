@@ -1,0 +1,123 @@
+/* Jessey Clinic - Mobile Dashboard Styles */
+/* Optimized for phones (max-width: 576px) */
+
+@media (max-width: 576px) {
+    body {
+        font-size: 14px;
+    }
+    .wrapper {
+        display: block;
+    }
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        z-index: 1050;
+        height: 100%;
+        transition: left 0.3s ease;
+    }
+    #sidebar.active {
+        left: 0;
+    }
+    #content {
+        margin-left: 0;
+        padding: 10px;
+    }
+    .navbar-custom {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    .card-stats {
+        margin-bottom: 15px;
+    }
+    .card-stats h2 {
+        font-size: 1.5rem;
+    }
+    .table {
+        font-size: 0.75rem;
+    }
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    .modal-dialog {
+        margin: 10px;
+    }
+}
+
+/* Mobile-specific components */
+.mobile-container {
+    padding: 10px;
+}
+.mobile-header {
+    text-align: center;
+    padding: 15px;
+    background: var(--jessey-primary);
+    color: white;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+.mobile-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.stat-card {
+    flex: 1;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--jessey-primary);
+}
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--jessey-gray);
+}
+.mobile-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.mobile-btn {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+}
+.mobile-btn.primary {
+    background: var(--jessey-primary);
+    color: white;
+}
+.mobile-btn.warning {
+    background: var(--jessey-warning);
+    color: white;
+}
+.mobile-btn.info {
+    background: var(--jessey-info);
+    color: white;
+}
+.mobile-recent {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+}
+.recent-list {
+    list-style: none;
+    padding: 0;
+}
+.recent-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}

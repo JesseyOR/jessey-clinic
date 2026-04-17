@@ -1,0 +1,204 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-shopping-cart"></i> Your Cart</h5>
+                </div>
+                <div class="card-body">
+                    {% if items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Subtotal</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in items %}
+                                    <tr>
+                                        <td>
+                                            {{ item.drug.name }}
+                                            {% if item.drug.requires_prescription %}
+                                                <span class="badge bg-warning ms-2">Rx Required</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>${{ "%.2f"|format(item.drug.selling_price) }}</td>
+                                        <td>
+                                            <div class="input-group" style="width: 120px;">
+                                                <button class="btn btn-sm btn-outline-secondary update-qty" data-id="{{ item.drug.id }}" data-change="-1">-</button>
+                                                <input type="text" class="form-control text-center qty-input" value="{{ item.quantity }}" data-id="{{ item.drug.id }}" readonly style="width: 50px;">
+                                                <button class="btn btn-sm btn-outline-secondary update-qty" data-id="{{ item.drug.id }}" data-change="1">+</button>
+                                            </div>
+                                        </td>
+                                        <td>${{ "%.2f"|format(item.subtotal) }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger remove-item" data-id="{{ item.drug.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <p>Your cart is empty</p>
+                            <a href="{{ url_for('sales.checkout') }}" class="btn btn-primary">Start Shopping</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5>Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ "%.2f"|format(subtotal) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax (10%):</span>
+                        <span>${{ "%.2f"|format(tax) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Discount:</span>
+                        <span>
+                            <input type="number" id="discountInput" class="form-control form-control-sm" style="width: 100px;" placeholder="Amount" value="0">
+                        </span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong id="totalAmount">${{ "%.2f"|format(total) }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <label>Payment Method</label>
+                        <select id="paymentMethod" class="form-select">
+                            <option value="cash">Cash</option>
+                            <option value="card">Card</option>
+                            <option value="insurance">Insurance</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label>Patient (for prescription drugs)</label>
+                        <select id="patientId" class="form-select">
+                            <option value="">Walk-in Customer</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.id }}">{{ patient.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button id="checkoutBtn" class="btn btn-success w-100" {% if not items %}disabled{% endif %}>
+                        <i class="fas fa-credit-card"></i> Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateCart() {
+        location.reload();
+    }
+    
+    $('.update-qty').click(function() {
+        let drugId = $(this).data('id');
+        let change = $(this).data('change');
+        let currentQty = parseInt($(this).closest('tr').find('.qty-input').val());
+        let newQty = currentQty + change;
+        if (newQty < 1) {
+            // Remove item
+            $.ajax({
+                url: '/sales/remove-from-cart',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({drug_id: drugId}),
+                success: updateCart
+            });
+        } else {
+            // Need to adjust cart - simplest is to set new quantity via API
+            // For simplicity, we'll just add/subtract one via existing endpoints
+            if (change === 1) {
+                $.ajax({
+                    url: '/sales/add-to-cart',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({drug_id: drugId, quantity: 1}),
+                    success: updateCart
+                });
+            } else {
+                // Remove one
+                $.ajax({
+                    url: '/sales/remove-one-from-cart',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({drug_id: drugId}),
+                    success: updateCart
+                });
+            }
+        }
+    });
+    
+    $('.remove-item').click(function() {
+        let drugId = $(this).data('id');
+        $.ajax({
+            url: '/sales/remove-from-cart',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({drug_id: drugId}),
+            success: updateCart
+        });
+    });
+    
+    $('#checkoutBtn').click(function() {
+        let discount = parseFloat($('#discountInput').val()) || 0;
+        let paymentMethod = $('#paymentMethod').val();
+        let patientId = $('#patientId').val();
+        
+        $.ajax({
+            url: '/sales/complete-sale',
+            method: 'POST',
+            data: {
+                discount: discount,
+                payment_method: paymentMethod,
+                patient_id: patientId
+            },
+            success: function(response) {
+                if (response.invoice) {
+                    window.location.href = '/sales/receipt/' + response.invoice;
+                } else {
+                    window.location.href = '/sales/history';
+                }
+            },
+            error: function(xhr) {
+                alert('Sale failed: ' + xhr.responseText);
+            }
+        });
+    });
+    
+    $('#discountInput').on('input', function() {
+        let discount = parseFloat($(this).val()) || 0;
+        let subtotal = {{ subtotal }};
+        let tax = {{ tax }};
+        let total = subtotal + tax - discount;
+        $('#totalAmount').text('$' + total.toFixed(2));
+    });
+</script>
+{% endblock %}
